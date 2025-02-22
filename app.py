@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import io
 
-# Load the trained model
 @st.cache_resource
 def load_model():
     model = models.resnet18(pretrained=False)
@@ -21,14 +20,12 @@ def load_model():
 
 model = load_model()
 
-# Define image transformations
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-# Function to convert audio to mel spectrogram image
 def audio_to_melspectrogram(audio_file):
     y, sr = librosa.load(audio_file, sr=None)
     mel_spectrogram = librosa.feature.melspectrogram(y=y, sr=sr)
@@ -44,7 +41,6 @@ def audio_to_melspectrogram(audio_file):
     buf.seek(0)
     return Image.open(buf).convert('RGB')
 
-# Streamlit UI
 st.title("Audio Classification using Mel Spectrogram")
 uploaded_file = st.file_uploader("Upload an audio file for classification", type=["wav", "mp3", "ogg", "flac"])
 
@@ -58,7 +54,7 @@ if uploaded_file is not None:
         output = model(image_tensor)
         _, pred = torch.max(output, 1)
     
-    class_names = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4']  # Update with actual class names
+    class_names = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4']
     predicted_class = class_names[pred.item()]
     
     st.write(f"**Prediction:** {predicted_class}")
