@@ -26,27 +26,30 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-def audio_to_melspectrogram(audio_file):
+
+def audio_to_spectrogram(audio_file):
     y, sr = librosa.load(audio_file, sr=None)
-    mel_spectrogram = librosa.feature.melspectrogram(y=y, sr=sr)
-    mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
+    D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
     
-    fig, ax = plt.subplots()
-    librosa.display.specshow(mel_spectrogram_db, sr=sr, x_axis='time', y_axis='mel', ax=ax)
-    ax.axis('off')
-    
+    fig, ax = plt.subplots(figsize=(10, 4))
+    img = librosa.display.specshow(D, sr=sr, x_axis='time', y_axis='log', ax=ax) 
+    plt.colorbar(img, format='%+2.0f dB')  
+    plt.title('Spectrogram')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Frequency (Hz)')
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(buf, format='png', dpi=300, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
     buf.seek(0)
     return Image.open(buf).convert('RGB')
 
-st.title("Audio Classification using Mel Spectrogram")
+
+st.title("Audio Classification using Spectrogram")
 uploaded_file = st.file_uploader("Upload an audio file for classification", type=["wav", "mp3", "ogg", "flac"])
 
 if uploaded_file is not None:
-    spectrogram_image = audio_to_melspectrogram(uploaded_file)
-    st.image(spectrogram_image, caption="Generated Mel Spectrogram", use_column_width=True)
+    spectrogram_image = audio_to_spectrogram(uploaded_file)
+    st.image(spectrogram_image, caption="Generated Spectrogram", use_column_width=True)
     
     image_tensor = transform(spectrogram_image).unsqueeze(0)
     
@@ -54,7 +57,7 @@ if uploaded_file is not None:
         output = model(image_tensor)
         _, pred = torch.max(output, 1)
     
-    class_names = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4']
+    class_names = ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4'] 
     predicted_class = class_names[pred.item()]
     
     st.write(f"**Prediction:** {predicted_class}")
