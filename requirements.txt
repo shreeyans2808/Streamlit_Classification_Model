@@ -5,3 +5,6 @@ librosa
 numpy
 matplotlib
 pillow
+tensorflow
+sklearn
+warnings
