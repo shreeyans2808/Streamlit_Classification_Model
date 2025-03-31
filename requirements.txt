@@ -2,9 +2,9 @@ streamlit
 torch
 torchvision
 librosa
-numpy
+pydub
+scikit-learn
 matplotlib
-pillow
+numpy
+Pillow
 tensorflow
-sklearn
-warnings
